@@ -562,6 +562,9 @@ class LambdaScheduler:
                 if c is None:
                     # insufficient memory
                     self.capacity_misses[d.kind] += 1
+
+                    processing_time = d.run_time
+                    self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
                     
                     #memusage = sum([k.metadata.mem_size for k in self.running_c.keys()])
                     return #memusage/self.mem_capacity
@@ -579,6 +582,9 @@ class LambdaScheduler:
                 if c is None:
                     # insufficient memory
                     self.capacity_misses[d.kind] += 1
+
+                    processing_time = d.run_time
+                    self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
                     
                     #memusage = sum([k.metadata.mem_size for k in self.running_c.keys()])
                     return #memusage/self.mem_capacity
@@ -599,6 +605,9 @@ class LambdaScheduler:
                     if c is None:
                         # insufficient memory
                         self.capacity_misses[d.kind] += 1
+
+                        processing_time = d.run_time
+                        self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
                         
                         #memusage = sum([k.metadata.mem_size for k in self.running_c.keys()])
                         return #memusage/self.mem_capacity
@@ -626,6 +635,9 @@ class LambdaScheduler:
                     if c is None:
                         # insufficient memory
                         self.capacity_misses[d.kind] += 1
+
+                        processing_time = d.run_time
+                        self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
                         
                         #memusage = sum([k.metadata.mem_size for k in self.running_c.keys()])
                         return #memusage/self.mem_capacity

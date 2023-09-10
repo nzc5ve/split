@@ -29,6 +29,7 @@ class LambdaScheduler:
         self.finish_times = []
         self.running_c = dict()
         self.ContainerPool = []
+        self.frequency = dict()
         
         #with open("./data/trace_pckl/represent/BMO_trace.pckl", "r+b") as f:
         #    self.BMO_trace = pickle.load(f)
@@ -284,7 +285,8 @@ class LambdaScheduler:
         prio = c.last_access_t
             
         if self.eviction_policy == "FTC_S":
-            freq = sum([x.frequency for x in self.container_clones(c)])/(t//(1000*60)+1)
+            #freq = sum([x.frequency for x in self.container_clones(c)])/(t//(1000*60)+1)
+            freq = self.frequency[c.metadata.kind] / (t//(1000*60)+1)
             #freq is the frequency of the current container
             cost = float(c.metadata.run_time - c.metadata.warm_time)  # cost is the cold start time
             size = c.metadata.mem_size
@@ -543,6 +545,11 @@ class LambdaScheduler:
 
     def runActivation(self, d: LambdaData, t = 0):
 
+        if d.kind not in self.frequency:
+            self.frequency[d.kind] = 1
+        else:
+            self.frequency[d.kind] += 1
+
         self.wall_time = t
         self.cleanup_finished()
 
@@ -563,8 +570,8 @@ class LambdaScheduler:
                     # insufficient memory
                     self.capacity_misses[d.kind] += 1
 
-                    processing_time = d.run_time
-                    self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
+                    #processing_time = d.run_time
+                    #self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
                     
                     #memusage = sum([k.metadata.mem_size for k in self.running_c.keys()])
                     return #memusage/self.mem_capacity
@@ -583,8 +590,8 @@ class LambdaScheduler:
                     # insufficient memory
                     self.capacity_misses[d.kind] += 1
 
-                    processing_time = d.run_time
-                    self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
+                    #processing_time = d.run_time
+                    #self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
                     
                     #memusage = sum([k.metadata.mem_size for k in self.running_c.keys()])
                     return #memusage/self.mem_capacity
@@ -606,8 +613,8 @@ class LambdaScheduler:
                         # insufficient memory
                         self.capacity_misses[d.kind] += 1
 
-                        processing_time = d.run_time
-                        self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
+                        #processing_time = d.run_time
+                        #self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
                         
                         #memusage = sum([k.metadata.mem_size for k in self.running_c.keys()])
                         return #memusage/self.mem_capacity
@@ -636,8 +643,8 @@ class LambdaScheduler:
                         # insufficient memory
                         self.capacity_misses[d.kind] += 1
 
-                        processing_time = d.run_time
-                        self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
+                        #processing_time = d.run_time
+                        #self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
                         
                         #memusage = sum([k.metadata.mem_size for k in self.running_c.keys()])
                         return #memusage/self.mem_capacity

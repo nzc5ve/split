@@ -17,7 +17,7 @@ def gen_alibaba_trace(file):
             overview[data['functionName'][i]] = [0] * (max(data['timestamp']) + 1)
         if data['functionName'][i] not in characteristic:
             characteristic[data['functionName'][i]] = [data['functionName'][i], data['memoryInMB'][i], data['coldstartLatency'][i], data['avgDurationMs'][i]]
-        overview[data['functionName'][i]][data['timestamp'][i]] += 1
+        overview[data['functionName'][i]][data['timestamp'][i]] = data['concurrency'][i]
 
     for func in overview.keys():
         one_func_trace = []

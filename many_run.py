@@ -41,10 +41,15 @@ def compare_pols(policy, num_functions, char, mem_capacity=32000, args=None):
         i = 0
         #mempercent = 0
         #file = open('/home/qichangl/data/azure_workload.txt', 'a')
+
+        mem_update = dict()
+
         for d, t in trace:
 
             #d.run_time = d.warm_time + 2.5*d.mem_size
-            d.mem_size = 10*d.mem_size
+            if d.kind not in mem_update:
+                mem_update[d.kind] = d.mem_size
+            d.mem_size = 10*mem_update[d.kind]
         
 
             if d.kind not in L.real_init:

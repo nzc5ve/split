@@ -288,7 +288,7 @@ class LambdaScheduler:
             freq = self.frequency[c.metadata.kind] / (t//(1000*60)+1)
             #freq is the frequency of the current container
             cost = float(c.metadata.run_time - c.metadata.warm_time)  # cost is the cold start time
-            size = c.metadata.mem_size
+            size = c.metadata.mem_size/10
             rank = max(len(self.container_clones(c)), 1) # order of the node in the tree (c.node_order)
             prio = clock + freq*(cost/size)/rank
 
@@ -296,7 +296,7 @@ class LambdaScheduler:
             freq = sum([x.frequency for x in self.container_clones(c)])
             #freq shoud be of all containers for this lambda actiion, not just this one...
             cost = float(c.metadata.run_time - c.metadata.warm_time)  # run_time - warm_time, or just warm_time , or warm/run_time
-            size = c.metadata.mem_size
+            size = c.metadata.mem_size/10
             prio = clock + freq*(cost/size)
 
         elif self.eviction_policy == "GD_R":

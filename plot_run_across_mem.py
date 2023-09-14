@@ -13,8 +13,8 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 import argparse
 
-data_path = "./data/verify-test/analyzed/"
-plot_dir = "./data/figs/"
+data_path = "/home/qichangl/data/verify-test/analyzed/"
+plot_dir = "/home/qichangl/data/figs/"
 
 def plot_results(result_dict, save_path):
     fig, ax = plt.subplots()
@@ -33,14 +33,13 @@ def plot_results(result_dict, save_path):
             ys = [y*100 for x,y in pts]
             ax.plot(xs, ys, label=policy, linestyle=style[i%3], color=colors[i])
         #ys = [y*100 for x,y in pts]
-        #print(ys)
+
         print(policy, colors[i])
 
     ax.set_ylabel("Increase in\nexecution delay (%)", fontsize=19)
     ax.set_xlabel("Memory capacity (GB)", fontsize=19)
     ax.tick_params(labelsize=18)
-    #ax.yaxis.set_ticks([0,20,40,60,80,100])
-    ax.yaxis.set_ticks([0,2,4,6,8,10])
+    ax.yaxis.set_ticks([0,20,40,60,80,100])
     ax.legend(bbox_to_anchor=(1.025,.68), loc="right", columnspacing=0.5, fontsize=15, ncol=2)
     #ax.legend(bbox_to_anchor=(1.025,.60), loc="right", columnspacing=0.5, fontsize=15, ncol=1)
     print(save_path)
@@ -82,7 +81,7 @@ def plot_run(results_dict, num_funcs):
                 analysis = results_dict[mem][policy]
                 results_per_policy[policy].append((mem , analysis["global"]["total_cold"]/(analysis["global"]["total_cold"]+analysis["global"]["total_exec"])))
                 
-                print(results_per_policy)
+    print(results_per_policy)
 
     pth = os.path.join(plot_dir, "exec_time-{}.pdf".format(num_funcs))
     plot_results(results_per_policy, pth)
@@ -99,9 +98,9 @@ def plot_all(args):
                 # analysis: output from analyze_timings
                 # capacity_misses: dict[func_name] = invocations_not_handled
                 # len_trace: long
-                # print(file)
+
                 tup = load_data(os.path.join(data_path, file))
-                # print(tup)
+
                 if len(tup) == 3:
                     policy, analysis, capacity_misses = tup
                 else:
@@ -116,9 +115,9 @@ def plot_all(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='plot FaasCache Simulation')
-    parser.add_argument("--analyzeddir", type=str, default="./data/verify-test/analyzed/", required=False)
-    parser.add_argument("--plotdir", type=str, default="./data/figs", required=False)
-    parser.add_argument("--numfuncs", type=int, default=325, required=False)
+    parser.add_argument("--analyzeddir", type=str, default="/home/qichangl/data/verify-test/analyzed/", required=False)
+    parser.add_argument("--plotdir", type=str, default="/home/qichangl/data/figs", required=False)
+    parser.add_argument("--numfuncs", type=int, default=750, required=False)
     args = parser.parse_args()
     data_path = args.analyzeddir
     plot_dir = args.plotdir

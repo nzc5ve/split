@@ -24,7 +24,6 @@ def plot_results(result_dict, save_path):
     markers = ["o", "^", "1", "p", "*", "+", "x", "D", "h"]
     style = ["-", ":", "dashdot"]
     #style = ["-", "-", "-"]
-    # pprint(result_dict)
     
     for i, policy in enumerate(pols):
         pts = sorted(result_dict[policy], key=lambda x: x[0])
@@ -34,10 +33,7 @@ def plot_results(result_dict, save_path):
 
             ys = [y*100 for x,y in pts]
             ax.plot(xs, ys, label=policy, linestyle=style[i%3], color=colors[i])
-            #print(ys[0])
 
-        #ys = [y*100 for x,y in pts]
-        #print(ys)
         print(policy, colors[i])
         #ax.plot(xs, ys, label=policy, linestyle=style[i%3], color=colors[i]) #, marker=markers[i]
 
@@ -52,7 +48,7 @@ def plot_results(result_dict, save_path):
     plt.savefig(save_path, bbox_inches="tight")
     plt.close(fig)
 
-data_path = "./data/verify-test/analyzed/"
+data_path = "/home/qichangl/data/verify-test/analyzed/"
 
 def average_dicts(dlist):
     n = len(dlist)
@@ -79,9 +75,7 @@ def load_data(path):
         return pickle.load(f)
 
 def plot_run(results_dict, num_funcs):
-    results_per_policy = defaultdict(list)
-    results_per_policy1 = defaultdict(list)
-    results_per_policy2 = defaultdict(list) # p -> [global-dicts]
+    results_per_policy = defaultdict(list) # p -> [global-dicts]
 
     for mem in results_dict.keys():
         accesses_per_policy = defaultdict(int) # p -> [global-dicts]
@@ -94,20 +88,13 @@ def plot_run(results_dict, num_funcs):
             total_misses = analysis["global"]["misses"]
             total_hitreuse = analysis["global"]["hitreuse"]
             results_per_policy[policy].append((mem , (total_misses) / (total_misses+total_purehits+total_hitreuse)))
-            results_per_policy1[policy].append((mem , (total_purehits) / (total_misses+total_purehits+total_hitreuse)))
-            results_per_policy2[policy].append((mem , (total_hitreuse) / (total_misses+total_purehits+total_hitreuse)))
 
             #results_per_policy[policy].append((mem , misses_per_policy[policy] / accesses_per_policy[policy]))
-        #if mem == 20000:
-        #    print(results_per_policy)
+    print(results_per_policy)
 
     pth = os.path.join(plot_dir, "miss_rate-{}.pdf".format(num_funcs))
-    pth1 = os.path.join(plot_dir, "warm_rate-{}.pdf".format(num_funcs))
-    pth2 = os.path.join(plot_dir, "delayed_rate-{}.pdf".format(num_funcs))
     #pth = os.path.join(plot_dir, "Num_start-{}.pdf".format(num_funcs))
     plot_results(results_per_policy, pth)
-    plot_results(results_per_policy1, pth1)
-    plot_results(results_per_policy2, pth2)
 
 def plot_all(args):
     data = dict()
@@ -121,9 +108,9 @@ def plot_all(args):
                 # analysis: output from analyze_timings
                 # capacity_misses: dict[func_name] = invocations_not_handled
                 # len_trace: long
-                # print(file)
+
                 tup = load_data(os.path.join(data_path, file))
-                # print(tup)
+
                 if len(tup) == 3:
                     policy, analysis, capacity_misses = tup
                 else:
@@ -138,9 +125,9 @@ def plot_all(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='plot FaasCache Simulation')
-    parser.add_argument("--analyzeddir", type=str, default="./data/verify-test/analyzed/", required=False)
-    parser.add_argument("--plotdir", type=str, default="./data/figs", required=False)
-    parser.add_argument("--numfuncs", type=int, default=325, required=False)
+    parser.add_argument("--analyzeddir", type=str, default="/home/qichangl/data/verify-test/analyzed/", required=False)
+    parser.add_argument("--plotdir", type=str, default="/home/qichangl/data/figs", required=False)
+    parser.add_argument("--numfuncs", type=int, default=750, required=False)
     args = parser.parse_args()
     data_path = args.analyzeddir
     plot_dir = args.plotdir

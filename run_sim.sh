@@ -8,7 +8,7 @@ analyzed_dir="$trace_output_dir/analyzed"
 plot_dir="./data/figs"
 
 
-num_funcs=750
+num_funcs=566
 
 memstep=5000
 

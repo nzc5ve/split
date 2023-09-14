@@ -29,14 +29,14 @@ class LambdaScheduler:
         self.finish_times = []
         self.running_c = dict()
         self.ContainerPool = []
-        self.frequency = dict()
         
         #with open("./data/trace_pckl/represent/BMO_trace.pckl", "r+b") as f:
         #    self.BMO_trace = pickle.load(f)
         self.BMO_trace = 1
 
         self.real_init = dict()
-        self.GD_init_wait = []
+        self.delay_exec = []
+        self.frequency = dict()
 
         self.PerfLogFName = os.path.join(log_dir, fname+"performancelog.csv")
         self.PerformanceLog = open(self.PerfLogFName, "w")
@@ -219,7 +219,7 @@ class LambdaScheduler:
                                                      x not in self.running_c)]
         
         #find warm containers to reuse
-        if (self.eviction_policy in ["FTC_S","GD","GD_R","LRU_R"]) and (containers_for_the_lambda == []):
+        if (self.eviction_policy in ["FTC_S","GD_R","LRU_R"]) and (containers_for_the_lambda == []):
             all_warm_containers = [x for x in self.ContainerPool if (x.metadata == d and
                                                      x in self.running_c)]
             warm_containers_to_reuse =  [x for x in all_warm_containers if 
@@ -285,7 +285,6 @@ class LambdaScheduler:
         prio = c.last_access_t
             
         if self.eviction_policy == "FTC_S":
-            #freq = sum([x.frequency for x in self.container_clones(c)])/(t//(1000*60)+1)
             freq = self.frequency[c.metadata.kind] / (t//(1000*60)+1)
             #freq is the frequency of the current container
             cost = float(c.metadata.run_time - c.metadata.warm_time)  # cost is the cold start time
@@ -543,6 +542,104 @@ class LambdaScheduler:
 
     ##############################################################
 
+    def real_init_update(self, d: LambdaData):
+
+        if self.real_init[d.kind][2] < 20:
+            start_time = time.time()
+            os.system("docker load -i ./image/image150ms.tar")
+            end_time = time.time()
+            end_time = start_time + (end_time - start_time)/10
+        elif self.real_init[d.kind][2] < 35:
+            start_time = time.time()
+            os.system("docker load -i ./image/image150ms.tar")
+            end_time = time.time()
+            end_time = start_time + 2*(end_time - start_time)/10
+        elif self.real_init[d.kind][2] < 50:
+            start_time = time.time()
+            os.system("docker load -i ./image/image150ms.tar")
+            end_time = time.time()
+            end_time = start_time + 3*(end_time - start_time)/10
+        elif self.real_init[d.kind][2] < 65:
+            start_time = time.time()
+            os.system("docker load -i ./image/image150ms.tar")
+            end_time = time.time()
+            end_time = start_time + 4*(end_time - start_time)/10
+        elif self.real_init[d.kind][2] < 80:
+            start_time = time.time()
+            os.system("docker load -i ./image/image150ms.tar")
+            end_time = time.time()
+            end_time = start_time + 5*(end_time - start_time)/10
+        elif self.real_init[d.kind][2] < 95:
+            start_time = time.time()
+            os.system("docker load -i ./image/image150ms.tar")
+            end_time = time.time()
+            end_time = start_time + 6*(end_time - start_time)/10
+        elif self.real_init[d.kind][2] < 110:
+            start_time = time.time()
+            os.system("docker load -i ./image/image150ms.tar")
+            end_time = time.time()
+            end_time = start_time + 7*(end_time - start_time)/10
+        elif self.real_init[d.kind][2] < 200:
+            start_time = time.time()
+            os.system("docker load -i ./image/image150ms.tar")
+            end_time = time.time()
+        elif self.real_init[d.kind][2] < 300:
+            start_time = time.time()
+            os.system("docker load -i ./image/image250ms.tar")
+            end_time = time.time()
+        elif self.real_init[d.kind][2] < 400:
+            start_time = time.time()
+            os.system("docker load -i ./image/image350ms.tar")
+            end_time = time.time()
+        elif self.real_init[d.kind][2] < 500:
+            start_time = time.time()
+            os.system("docker load -i ./image/image450ms.tar")
+            end_time = time.time()
+        elif self.real_init[d.kind][2] < 600:
+            start_time = time.time()
+            os.system("docker load -i ./image/image550ms.tar")
+            end_time = time.time()
+        elif self.real_init[d.kind][2] < 700:
+            start_time = time.time()
+            os.system("docker load -i ./image/image650ms.tar")
+            end_time = time.time()
+        elif self.real_init[d.kind][2] < 800:
+            start_time = time.time()
+            os.system("docker load -i ./image/image750ms.tar")
+            end_time = time.time()
+        elif self.real_init[d.kind][2] < 900:
+            start_time = time.time()
+            os.system("docker load -i ./image/image850ms.tar")
+            end_time = time.time()
+        elif self.real_init[d.kind][2] < 1000:
+            start_time = time.time()
+            os.system("docker load -i ./image/image950ms.tar")
+            end_time = time.time()
+        elif self.real_init[d.kind][2] < 1200:
+            start_time = time.time()
+            os.system("docker load -i ./image/image1050ms.tar")
+            end_time = time.time()
+        elif self.real_init[d.kind][2] < 1400:
+            start_time = time.time()
+            os.system("docker load -i ./image/image1300ms.tar")
+            end_time = time.time()
+        elif self.real_init[d.kind][2] < 1650:
+            start_time = time.time()
+            os.system("docker load -i ./image/image1550ms.tar")
+            end_time = time.time()
+        elif self.real_init[d.kind][2] < 1950:
+            start_time = time.time()
+            os.system("docker load -i ./image/image1800ms.tar")
+            end_time = time.time()
+        else:
+            start_time = time.time()
+            os.system("docker load -i ./image/image2050ms.tar")
+            end_time = time.time()
+
+        os.system("docker rmi -f $(docker images -q)")
+        self.real_init[d.kind][0] += 1
+        self.real_init[d.kind][1] += (1000*(end_time - start_time))
+
     def runActivation(self, d: LambdaData, t = 0):
 
         if d.kind not in self.frequency:
@@ -565,13 +662,11 @@ class LambdaScheduler:
             if warm_containers_to_reuse == []: #No warm containers to reuse
                 #Launch a new container since we didnt find one for the metadata ...
                 c = self.cache_miss(d)
-
+                if random.random() < 0.25:
+                    self.real_init_update(d)
                 if c is None:
                     # insufficient memory
                     self.capacity_misses[d.kind] += 1
-
-                    #processing_time = d.run_time
-                    #self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
                     
                     #memusage = sum([k.metadata.mem_size for k in self.running_c.keys()])
                     return #memusage/self.mem_capacity
@@ -580,27 +675,7 @@ class LambdaScheduler:
                 processing_time = d.run_time
                 self.running_c[c] = (t, t+processing_time)
                 self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
-
-            elif  self.eviction_policy in ["GD"]:
-                waiting_time = self.running_c[warm_containers_to_reuse[0]][1] - t
-                #Launch a new container since we didnt find one for the metadata ...
-                c = self.cache_miss(d)
-
-                if c is None:
-                    # insufficient memory
-                    self.capacity_misses[d.kind] += 1
-
-                    #processing_time = d.run_time
-                    #self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
-                    
-                    #memusage = sum([k.metadata.mem_size for k in self.running_c.keys()])
-                    return #memusage/self.mem_capacity
-                c.run()
-                #Need to update priority here?
-                processing_time = d.run_time
-                self.running_c[c] = (t, t+processing_time)
-                self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
-                self.GD_init_wait.append((d.run_time-d.warm_time, waiting_time))
+                self.delay_exec.append((d.run_time-d.warm_time, d.warm_time))
 
             elif (self.eviction_policy in ["FTC_R"]):
                 #Compute the waiting time
@@ -608,13 +683,11 @@ class LambdaScheduler:
                 if self.checkfree(Container(d)) or ((d.run_time - d.warm_time) < waiting_time): #If waiting time is longer
                     #Launch a new container since we didnt find one for the metadata ...
                     c = self.cache_miss(d)
-
+                    if random.random() < 0.25:
+                        self.real_init_update(d)
                     if c is None:
                         # insufficient memory
                         self.capacity_misses[d.kind] += 1
-
-                        #processing_time = d.run_time
-                        #self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
                         
                         #memusage = sum([k.metadata.mem_size for k in self.running_c.keys()])
                         return #memusage/self.mem_capacity
@@ -623,6 +696,7 @@ class LambdaScheduler:
                     processing_time = d.run_time
                     self.running_c[c] = (t, t+processing_time)
                     self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
+                    self.delay_exec.append((d.run_time-d.warm_time, d.warm_time))
 
                 else: #If waiting time is shorter
                     #Reuse a warm container
@@ -631,20 +705,19 @@ class LambdaScheduler:
                     processing_time = waiting_time + d.warm_time
                     self.running_c[c] = (t, t+processing_time)
                     self.WritePerfLog(d, waiting_time, d.warm_time, "hitreuse") #reuse hit
+                    self.delay_exec.append((waiting_time, d.warm_time))
             
-            elif (self.eviction_policy in ["GD_R","LRU_R","FTC_S"]):
+            elif (self.eviction_policy in ["FTC_S","GD_R","LRU_R"]):
                 #Parallel provision and reuse
                 waiting_time = self.running_c[warm_containers_to_reuse[0]][1] - t
                 if self.checkfree(Container(d)) or ((d.run_time - d.warm_time) < waiting_time): #If waiting time is longer
                     #Launch a new container since we didnt find one for the metadata ...
                     c = self.cache_miss(d)
-
+                    if random.random() < 0.25:
+                        self.real_init_update(d)
                     if c is None:
                         # insufficient memory
                         self.capacity_misses[d.kind] += 1
-
-                        #processing_time = d.run_time
-                        #self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
                         
                         #memusage = sum([k.metadata.mem_size for k in self.running_c.keys()])
                         return #memusage/self.mem_capacity
@@ -653,11 +726,13 @@ class LambdaScheduler:
                     processing_time = d.run_time
                     self.running_c[c] = (t, t+processing_time)
                     self.WritePerfLog(d, d.run_time-d.warm_time, d.warm_time, "miss")
+                    self.delay_exec.append((d.run_time-d.warm_time, d.warm_time))
 
                 else: #If waiting time is shorter
                     #Reuse a warm container
                     c = warm_containers_to_reuse[0]
                     c1 = self.cache_miss(d)
+                    #self.real_init_update(d)
                     if c1 is not None:
                         c1.run()
                         processing_time_1 = d.run_time - d.warm_time
@@ -666,6 +741,7 @@ class LambdaScheduler:
                     processing_time = waiting_time + d.warm_time
                     self.running_c[c] = (t, t+processing_time)
                     self.WritePerfLog(d, waiting_time, d.warm_time, "hitreuse") #reuse hit
+                    self.delay_exec.append((waiting_time, d.warm_time))
 
         else:
             # Strong assumption. If we can find the container, it is warm.
@@ -673,6 +749,7 @@ class LambdaScheduler:
             processing_time = d.warm_time # d.run_time - d.warm_time
             self.running_c[c] = (t, t+processing_time)
             self.WritePerfLog(d, 0, d.warm_time, "hit")
+            self.delay_exec.append((0, d.warm_time))
 
         #update the priority here!!
         c.last_access_t = self.wall_time

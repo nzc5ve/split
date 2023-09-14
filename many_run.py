@@ -42,24 +42,27 @@ def compare_pols(policy, num_functions, char, mem_capacity=32000, args=None):
         #mempercent = 0
         #file = open('/home/qichangl/data/azure_workload.txt', 'a')
         for d, t in trace:
+
             #d.run_time = d.warm_time + 2.5*d.mem_size
+            d.mem_size = 10*d.mem_size
+        
+
+            if d.kind not in L.real_init:
+                L.real_init[d.kind] = [1, d.run_time - d.warm_time, d.run_time - d.warm_time]
+            else:
+                d.run_time = d.warm_time + (L.real_init[d.kind][1] / L.real_init[d.kind][0])
 
             #d.mem_size = d.mem_size + 150
             #file.write(str(d.mem_size)+','+str(d.run_time)+','+str(d.warm_time)+"\n")
             i += 1
             L.runActivation(d, t)
 
-            #real_init = L.real_init
 
             #mempercent += L.runActivation(d, t)
         #file = open('/home/qichangl/data/mem_usage.txt', 'a')
         #file.write(str(mempercent/i)+"_"+name+"\n")
         #file.close()
         #print(mempercent/i)
-
-        if policy == "GD":
-            GD_init_wait = "GD_{}_init_wait.npy".format(mem_capacity)
-            np.save(GD_init_wait, np.array(L.GD_init_wait))
 
         
         #L.MemUsageHist.flush()
@@ -70,6 +73,8 @@ def compare_pols(policy, num_functions, char, mem_capacity=32000, args=None):
         L.PerformanceLog.close()
         #L.PureCacheHist.close()
         
+        with open("{}_{}_delay_exec.npy".format(policy, mem_capacity), "w+b") as f:
+            pickle.dump(np.array(L.delay_exec), f)
 
         # policy = string
         # L.evdict:    dict[func_name] = eviction_count
@@ -88,21 +93,19 @@ def compare_pols(policy, num_functions, char, mem_capacity=32000, args=None):
     # file.close()
     #print("done", name, "and time is:", end-start)
     fname = "{}-{}-{}-{}-performancelog.csv".format(policy, num_functions, mem_capacity, char)
-
-    #if os.path.exists(os.path.join('./data/verify-test/logs/', fname)):
-    #    os.remove(os.path.join('./data/verify-test/logs/', fname))
-
+    if os.path.exists(os.path.join('./data/verify-test/logs/', fname)):
+        os.remove(os.path.join('./data/verify-test/logs/', fname))
     print("done", name)
 
 def run_multiple_expts(args):
     #policies = ["BMO","BMO_R"]
+    policies = ["FTC_S","GD"]
     #policies = ["MDP", "FTC_R", "FTC_T", "FTC_M", "FTC_S", "GD", "GD_R", "TTL", "LRU", "LRU_R", "LND", "HIST", "FREQ", "SIZE"]
-    policies = ["FTC_S","GD","LRU"]
-    mems = [20000,30000,40000,50000,60000,70000,80000]#[i for i in range(30000, 40001, args.memstep)]#[i for i in range(520000, 750001, args.memstep)]
+    mems = [30000]#[i for i in range(30000, 40001, args.memstep)]#[i for i in range(520000, 750001, args.memstep)]
     mems = set(mems)
     results = []
     print(len(policies) * len(mems))
-    with mp.Pool(40) as pool:
+    with mp.Pool(1) as pool:
         for policy in policies:
             for mem in mems:
                 for num_func in [args.numfuncs]:
@@ -118,7 +121,7 @@ def run_multiple_expts(args):
                 print(r)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Run FTC')
+    parser = argparse.ArgumentParser(description='Run FaasCache Simulation')
     parser.add_argument("--tracedir", type=str, default="./data/trace_pckl/represent/", required=False)
     parser.add_argument("--numfuncs", type=int, default=750, required=False)
     parser.add_argument("--savedir", type=str, default="./data/verify-test/", required=False)

@@ -29,6 +29,8 @@ class LambdaScheduler:
         self.finish_times = []
         self.running_c = dict()
         self.ContainerPool = []
+
+        
         
         #with open("./data/trace_pckl/represent/BMO_trace.pckl", "r+b") as f:
         #    self.BMO_trace = pickle.load(f)
@@ -215,18 +217,31 @@ class LambdaScheduler:
         """ search through the containerpool for matching container """
         if len(self.ContainerPool) == 0 :
             return None, []
-        containers_for_the_lambda = [x for x in self.ContainerPool if (x.metadata == d and
-                                                     x not in self.running_c)]
+
+        containers_for_the_lambda = []
+        all_warm_containers = []
         
         #find warm containers to reuse
-        if (self.eviction_policy in ["FTC_S","GD_R","LRU_R"]) and (containers_for_the_lambda == []):
-            all_warm_containers = [x for x in self.ContainerPool if (x.metadata == d and
-                                                     x in self.running_c)]
-            warm_containers_to_reuse =  [x for x in all_warm_containers if 
-                                         all(self.running_c[temp][1] >= self.running_c[x][1] 
-                                             for temp in all_warm_containers)]
+        if (self.eviction_policy in ["FTC_S","GD_R","LRU_R"]):
+            for x in self.ContainerPool:
+                if (x.metadata == d and x not in self.running_c):
+                    containers_for_the_lambda.append(x)
+                if (x.metadata == d and x in self.running_c):
+                    all_warm_containers.append(x)
+            if (containers_for_the_lambda == []):
+                
+                warm_containers_to_reuse = sorted(all_warm_containers, key=lambda x:self.running_c[x][1])
+
+            else:
+                warm_containers_to_reuse = []
+        
         else:
             warm_containers_to_reuse = []
+            for x in self.ContainerPool:
+                if (x.metadata == d and x not in self.running_c):
+                    containers_for_the_lambda.append(x)
+                    break
+            
         
         #for const-ttl, filter here, and remove.
         if self.eviction_policy == "TTL" and containers_for_the_lambda != []:

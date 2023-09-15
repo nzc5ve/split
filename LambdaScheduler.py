@@ -662,7 +662,7 @@ class LambdaScheduler:
             if warm_containers_to_reuse == []: #No warm containers to reuse
                 #Launch a new container since we didnt find one for the metadata ...
                 c = self.cache_miss(d)
-                if random.random() < 0.25:
+                if random.random() < 0.1:
                     self.real_init_update(d)
                 if c is None:
                     # insufficient memory
@@ -683,7 +683,7 @@ class LambdaScheduler:
                 if self.checkfree(Container(d)) or ((d.run_time - d.warm_time) < waiting_time): #If waiting time is longer
                     #Launch a new container since we didnt find one for the metadata ...
                     c = self.cache_miss(d)
-                    if random.random() < 0.25:
+                    if random.random() < 0.1:
                         self.real_init_update(d)
                     if c is None:
                         # insufficient memory
@@ -713,7 +713,7 @@ class LambdaScheduler:
                 if self.checkfree(Container(d)) or ((d.run_time - d.warm_time) < waiting_time): #If waiting time is longer
                     #Launch a new container since we didnt find one for the metadata ...
                     c = self.cache_miss(d)
-                    if random.random() < 0.25:
+                    if random.random() < 0.1:
                         self.real_init_update(d)
                     if c is None:
                         # insufficient memory

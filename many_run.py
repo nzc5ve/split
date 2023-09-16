@@ -45,6 +45,9 @@ def compare_pols(policy, num_functions, char, mem_capacity=32000, args=None):
         mem_update = dict()
 
         for d, t in trace:
+            
+            #if t > 1000*60*10:
+            #    break
 
             #d.run_time = d.warm_time + 2.5*d.mem_size
             if d.kind not in mem_update:

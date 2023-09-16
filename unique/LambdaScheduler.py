@@ -30,7 +30,7 @@ class LambdaScheduler:
         self.running_c = dict()
         self.ContainerPool = []
 
-        self.ContainerID = dict()
+        
         
         #with open("./data/trace_pckl/represent/BMO_trace.pckl", "r+b") as f:
         #    self.BMO_trace = pickle.load(f)
@@ -219,30 +219,28 @@ class LambdaScheduler:
             return None, []
 
         containers_for_the_lambda = []
-        warm_containers_to_reuse = []
+        all_warm_containers = []
         
         #find warm containers to reuse
-        if (self.eviction_policy in ["FTC_S","GD_R","FTC_R"]):
-            if d.kind in self.ContainerID:
-                warm = None
-                for x in self.ContainerID[d.kind].keys():
-                    if x not in self.running_c:
-                        containers_for_the_lambda.append(x)
-                    else:
-                        if warm == None:
-                            warm = x
-                        elif self.running_c[x][1] < self.running_c[warm][1]:
-                            warm = x
-                if warm != None:
-                    warm_containers_to_reuse.append(warm)
+        if (self.eviction_policy in ["FTC_S","GD_R","LRU_R"]):
+            for x in self.ContainerPool:
+                if (x.metadata == d and x not in self.running_c):
+                    containers_for_the_lambda.append(x)
+                if (x.metadata == d and x in self.running_c):
+                    all_warm_containers.append(x)
+            if (containers_for_the_lambda == []):
+                
+                warm_containers_to_reuse = sorted(all_warm_containers, key=lambda x:self.running_c[x][1])
+
+            else:
+                warm_containers_to_reuse = []
+        
         else:
-            if d.kind in self.ContainerID:
-                for x in self.ContainerID[d.kind].keys():
-                    if x not in self.running_c:
-                        containers_for_the_lambda.append(x)
-                        break
-
-
+            warm_containers_to_reuse = []
+            for x in self.ContainerPool:
+                if (x.metadata == d and x not in self.running_c):
+                    containers_for_the_lambda.append(x)
+                    break
             
         
         #for const-ttl, filter here, and remove.
@@ -306,15 +304,11 @@ class LambdaScheduler:
             #freq is the frequency of the current container
             cost = float(c.metadata.run_time - c.metadata.warm_time)  # cost is the cold start time
             size = c.metadata.mem_size/10
-            if c.metadata.kind in self.ContainerID:
-                rank = max(len(self.ContainerID[c.metadata.kind]), 1)
-            else:
-                rank = 1 # order of the node in the tree (c.node_order)
+            rank = max(len(self.container_clones(c)), 1) # order of the node in the tree (c.node_order)
             prio = clock + freq*(cost/size)/rank
 
         elif self.eviction_policy == "GD":
-            #######freq = sum([x.frequency for x in self.container_clones(c)])
-            freq = self.frequency[c.metadata.kind]
+            freq = sum([x.frequency for x in self.container_clones(c)])
             #freq shoud be of all containers for this lambda actiion, not just this one...
             cost = float(c.metadata.run_time - c.metadata.warm_time)  # run_time - warm_time, or just warm_time , or warm/run_time
             size = c.metadata.mem_size/10
@@ -385,11 +379,6 @@ class LambdaScheduler:
                 c.Priority = self.calc_priority(c,self.wall_time,self.BMO_trace)
             c.insert_clock = self.Clock #Need this when recomputing priority
             heapq.heappush(self.ContainerPool, c)
-
-            if c.metadata.kind not in self.ContainerID:
-                self.ContainerID[c.metadata.kind] = dict()
-            self.ContainerID[c.metadata.kind][c] = 1
-
             return True
         else:
             # print ("Not enough space for memsize, used, capacity.", mem_size, self.mem_used, self.mem_capacity)
@@ -484,8 +473,6 @@ class LambdaScheduler:
                 eviction_list.append(victim)
                 to_free -= victim.metadata.mem_size
 
-                del self.ContainerID[victim.metadata.kind][victim]
-
         return save, eviction_list
 
     #############################################################
@@ -557,13 +544,11 @@ class LambdaScheduler:
             (start_t, fin_t) = self.running_c[c]
             if t >= fin_t:
                 finished.append(c)
+
         for c in finished:
             del self.running_c[c]
-
-            '''
             if c.metadata.kind in self.histPrewarm and self.histPrewarm[c.metadata.kind] != 0:
                 self.RemoveFromPool(c, "HIST-prewarm")
-                '''
 
         heapq.heapify(self.ContainerPool)
         # We'd also like to set the container state to WARM (or atleast Not running.)
